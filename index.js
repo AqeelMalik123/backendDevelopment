@@ -35,13 +35,24 @@ app.get('/student-read',async (req, res) => {
 app.post('/student-insert',async(req,res)=>{
   let myDB=await dbConnection()
   let studentCollection=myDB.collection('students')
+  // let obj={
+  //   name:req.body.name,
+  //   email:req.body.email,
+  //   // password:req.body.password
+  // }
+  let {name,email}=req.body
   let obj={
-    name:req.body.name,
-    email:req.body.email,
-    // password:req.body.password
+    name,
+    email
+  }
+  let checkEmail=await studentCollection.findOne({email})
+  console.log(checkEmail,"checkEmail")
+   if(checkEmail){
+    return res.status(400).send({status:0,msg:"Email already exists"})
   }
   let insertRes=await studentCollection.insertOne(obj)
   console.log(obj,"obj")
+ 
   let resObj={
         status:1,
         msg:"Data Insert",
@@ -75,6 +86,29 @@ app.delete('/student-delete/:id', async (req, res) => {
     deletRes
   });
 });
+app.put('/student-update/:id',async(req,res)=>{
+  const { id } = req.params;
+  let {name,email}=req.body;
+  let obj={
+   
+    // password:req.body.password
+  }
+  if(name !=="" && name !== undefined){
+    obj['name']=name
+  }
+  if(email !=="" && email !== undefined){
+    obj['email']=email
+  }
+  const myDB = await dbConnection();
+  const studentCollection =myDB.collection('students');
+  let resData= await studentCollection.updateOne({_id: new ObjectId(id)},{$set:obj})
+  let resObj={
+    status:1,
+    msg:"Data Updated",
+    resData
+  }
+  res.send(resObj)
+})
 app.get('/new/:id',(req,res)=>{
   let currentId=req.params.id
   res.send('<h1>About page</h1>'+currentId)
