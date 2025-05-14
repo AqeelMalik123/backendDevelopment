@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const checkToken = require('./checkTokenMiddleware')
 const dbConnection = require('./dbConnection')
+const { ObjectId } = require('mongodb')
 const app = express()
 const port = 4000
 app.use(express.json())
@@ -20,8 +21,16 @@ app.use(express.json())
 //   next()
 // }
 // app.use(checkpassword )
-app.get('/student-read', (req, res) => {
-  res.send('Student View API')
+app.get('/student-read',async (req, res) => {
+  let myDB = await dbConnection()
+  let studentCollection = myDB.collection('students')
+  let list= await studentCollection.find().toArray()
+    let resObj={
+      status:1,
+      msg:"Student List",
+     list
+    }
+  res.send(resObj)
 })
 app.post('/student-insert',async(req,res)=>{
   let myDB=await dbConnection()
@@ -45,6 +54,27 @@ res.send(resObj)
 //   console.log(req.body)
 //  res.send({status:1,message:"Login Success",data:req.body})
 // })
+app.delete('/student-delete/:id', async (req, res) => {
+  const { id } = req.params;
+
+  // if (!ObjectId.isValid(id)) {
+  //   return res.status(400).send({ status: 0, msg: "Invalid ID" });
+  // }
+
+  const myDB = await dbConnection();
+  const studentCollection = myDB.collection('students');
+  const deletRes = await studentCollection.deleteOne({ _id: new ObjectId(id) });
+
+  // if (deletRes.deletedCount === 0) {
+  //   return res.status(404).send({ status: 0, msg: "Data not found" });
+  // }
+
+  res.send({
+    status: 1,
+    msg: "Data Deleted",
+    deletRes
+  });
+});
 app.get('/new/:id',(req,res)=>{
   let currentId=req.params.id
   res.send('<h1>About page</h1>'+currentId)
