@@ -6,7 +6,7 @@ const port = 4000
 app.use(express.json())
 
 let password='12345'
-
+console.log(process.env.TOKEN)
 // app.use(checkToken)
 let checkpassword=(req,res,next)=>{
   console.log('Password Middleware called')
@@ -33,6 +33,6 @@ app.get('/new/:id',(req,res)=>{
 app.get('/new',checkToken,(req,res)=>{
   res.send('<h2>Youtube chai or code me')
 })
-app.listen('3000',()=>{
+app.listen(process.env.PORT || 4000,()=>{
   console.log('Server is running on port 3000')
 })
